@@ -19,18 +19,14 @@ def plot(x, y, function):
     return Z
 
 def gradient_descent(step_size, grad_x, grad_y, x_old, y_old, iters=50):
-    x_trac, y_trac =[], []
+    x_trac, y_trac =[x_old], [y_old]
     for iter in xrange(iters):
         x_new = x_old - step_size*grad_x(x_old, y_old)
         y_new = y_old - step_size*grad_y(x_old, y_old)
+        x_trac.append(x_new)
+        y_trac.append(y_new)
         x_old, y_old = x_new, y_new
-    return x_new, y_new
-
-def get_z(x,y, function):
-    X, Y = np.meshgrid(x,y)
-    zs = np.array([function(x,y) for x,y in zip(np.ravel(X), np.ravel(Y))])
-    Z = zs.reshape(X.shape)
-    return Z
+    return x_trac, y_trac
 
 
 X = np.arange(-6, 6, 0.2)
@@ -43,22 +39,9 @@ Z = plot(X,Y, funct)
 
 grad_x = lambda x,y: 2*(x - 0.2)
 grad_y = lambda x,y: 2*y
-x_op, y_opt =gradient_descent(0.2, grad_x, grad_y, 3, 3 )
-print x_op, y_opt
-print funct(x_op, y_opt)
-
-"""
-func1 = lambda x, y: 1.125*x**2 + 0.5*x*y + 0.75*y**2 + 2*x - 2*y
-func2 = lambda x, y: 0.5*(x**2 + y**2) + 50 * math.log(1 + math.exp(-0.5*y)) + \
-                     50 * math.log(1 + math.exp(0.2*x))
-func3 = lambda x, y: 0.1*(x**2 + y - 11)**2 + 0.1*(x+y**2 -7)**2
-func4 = lambda x,y: 0.002*(1-x)**2 + 0.2*(y-x**2)**2
-for func in [func1, func2, func3]:
-    plot(func, X, Y)
-    plt.show()
-X = np.arange(-3,3,0.2)
-plot(func4,X, Y)
-plt.show()
-"""
-
+x_s, y_s =gradient_descent(0.2, grad_x, grad_y, 3, 3)
+x_opt = x_s[len(x_s) - 1]
+y_opt = y_s[len(y_s) - 1]
+print "optimum x: %s, y: %s"%(x_opt, y_opt)
+print "value ", funct(x_opt, y_opt)
 
