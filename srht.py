@@ -12,6 +12,10 @@ def sampling_matrix(n, r):
     for i, index in enumerate(sample_indices):
         S[index][i] = scaling_factor
     return S
+def projection_matrix(n, k, q):
+    konstant = np.sqrt(1/k*q)
+    pmatrix = np.random.choice([konstant, -konstant, 0], size=(k,n), p=[q/2, q/2,1-q])
+    return pmatrix
 
 def hadamard_transform(n):
     H = hadamard(n)
@@ -20,11 +24,15 @@ def hadamard_transform(n):
     np.fill_diagonal(D, d)
     return H, D
 
-def find_optimum(A, b, r):
+def find_optimum(A, b, r, technique, q=None):
     n, d = A.shape
-    S = sampling_matrix(n, r)
     H, D = hadamard_transform(n)
-    x_opt = np.linalg.pinv(S.T.dot(H).dot(D).dot(A)).dot(S.T).dot(H).dot(D).dot(b)
+    if technique == 'sampling':
+        S = sampling_matrix(n, r)
+        x_opt = np.linalg.pinv(S.T.dot(H).dot(D).dot(A)).dot(S.T).dot(H).dot(D).dot(b)
+    else:
+        T = projection_matrix(n, r, q)
+        x_opt = np.linalg.pinv(T.dot(H).dot(D).dot(A)).dot(T).dot(H).dot(D).dot(b)
     return x_opt
 
 if __name__ == '__main__':
@@ -33,5 +41,6 @@ if __name__ == '__main__':
     A = np.random.randn(n, d)
     b = np.random.randn(n)
     true_x = np.linalg.pinv(A).dot(b)
-    x_opt = find_optimum(A, b, r)
-    print "approximation error ", np.linalg.norm(true_x-x_opt)
+    for technique in ['sampling', 'projection']:
+        x_opt = find_optimum(A, b, r, technique,q=0.1)
+        print "approximation error ", np.linalg.norm(true_x-x_opt)
